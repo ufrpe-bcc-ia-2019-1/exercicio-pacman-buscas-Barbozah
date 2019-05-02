@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 import util
 from game import Directions
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -69,7 +70,8 @@ def tinyMazeSearch(problem):
     # from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -85,8 +87,23 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    start_state = problem.getStartState()
+    explored_state = [start]
+    states = util.Stack()
+    state_tuple = (start, [])
+    states.push(state_tuple)
+    while not states.isEmpty() and not problem.isGoalState(start_state):
+        state, actions = states.pop()
+        explored_state.append(state)
+        successor = problem.getSuccessors(state)
+        for i in successor:
+            coordinates = i[0]
+            if coordinates not in explored_state:
+                start_state = i[0]
+                direction = i[1]
+                states.push((coordinates, actions + [direction]))
+    return actions + [direction]
 
 
 def breadthFirstSearch(problem):
@@ -95,14 +112,47 @@ def breadthFirstSearch(problem):
     DICA: Utilizar util.PriorityQueue
     *** YOUR CODE HERE ***
     """
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    start_state = problem.getStartState()
+    explored_state = [start]
+    states = util.Queue()
+    state_tuple = (start, [])
+    states.push(state_tuple)
+    while not states.isEmpty() and not problem.isGoalState(start_state):
+        state, actions = states.pop()
+        explored_state.append(state)
+        successor = problem.getSuccessors(state)
+        for i in successor:
+            coordinates = i[0]
+            if coordinates not in explored_state:
+                start_state = i[0]
+                direction = i[1]
+                states.push((coordinates, actions + [direction]))
+    return actions + [direction]
 
     
 def uniformCostSearch(problem):
-    """Search the node of least total cost first.
-    *** YOUR CODE HERE ***
-    """
-    util.raiseNotDefined()
+    """Search the node of least total cost first."""
+    start = problem.getStartState()
+    start_state = problem.getStartState()
+    explored_state = [start]
+    states = util.Queue()
+    state_tuple = (start, [])
+    states.push(state_tuple)
+    while not states.isEmpty() and not problem.isGoalState(start_state):
+        state, actions = states.pop()
+        explored_state.append(state)
+        successor = problem.getSuccessors(state)
+        for i in successor:
+            coordinates = i[0]
+            if coordinates not in explored_state:
+                start_state = i[0]
+                direction = i[1]
+                states.push((coordinates, actions + [direction]))
+        """Ordering the stack at cost"""
+        states.list = sorted(states.list, key=lambda x: problem.getCostOfActions(x[1]))
+    return actions + [direction]
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -111,10 +161,24 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    open_list = [(start_state, '', 0)]
+    closed_list = []
+    while len(open_list) > 0:
+        current = open_list.pop()
+        for successor in problem.getSuccessors(current[0]):
+            if problem.isGoalState(successor):
+                break
+            successor_cost = current[2]+successor[2] + heuristic(successor, problem)
+            actions = (current[1] or []) + [successor[1]]
+            t = (successor[0], actions, successor_cost)
+            if t[0] not in [i[0] for i in open_list] and t[0] not in [i[0] for i in closed_list]:
+                open_list.insert(0, t)
+        closed_list.insert(0, current)
+    return closed_list[0][1]
 
 
 # Abbreviations
@@ -122,3 +186,4 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
